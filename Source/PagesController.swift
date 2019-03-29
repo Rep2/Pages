@@ -29,7 +29,7 @@ import UIKit
   }
 
   public var showPageControl = true
-  private lazy var pages = Array<UIViewController>()
+  public lazy var pages = Array<UIViewController>()
 
   public var pagesCount: Int {
     return pages.count
@@ -50,13 +50,13 @@ import UIKit
   public private(set) var pageControl: UIPageControl?
 
   public convenience init(_ pages: [UIViewController],
-                          transitionStyle: UIPageViewControllerTransitionStyle = .scroll,
-                          navigationOrientation: UIPageViewControllerNavigationOrientation = .horizontal,
+                          transitionStyle: UIPageViewController.TransitionStyle = .scroll,
+                          navigationOrientation: UIPageViewController.NavigationOrientation = .horizontal,
                           options: [String : AnyObject]? = nil) {
     self.init(
       transitionStyle: transitionStyle,
       navigationOrientation: navigationOrientation,
-      options: options
+      options: convertToOptionalUIPageViewControllerOptionsKeyDictionary(options)
     )
 
     add(pages)
@@ -70,7 +70,7 @@ import UIKit
 
     view.addSubview(bottomLineView)
     addConstraints()
-    view.bringSubview(toFront: bottomLineView)
+    view.bringSubviewToFront(bottomLineView)
     goTo(startPage)
   }
 
@@ -88,7 +88,7 @@ import UIKit
 
   open func goTo(_ index: Int) {
     if index >= 0 && index < pages.count {
-      let direction: UIPageViewControllerNavigationDirection = (index > currentIndex) ? .forward : .reverse
+      let direction: UIPageViewController.NavigationDirection = (index > currentIndex) ? .forward : .reverse
       let viewController = pages[index]
       currentIndex = index
 
@@ -242,4 +242,10 @@ extension PagesController {
     let pages = storyboardIds.map(storyboard.instantiateViewController(withIdentifier:))
     self.init(pages)
   }
+}
+
+// Helper function inserted by Swift 4.2 migrator.
+fileprivate func convertToOptionalUIPageViewControllerOptionsKeyDictionary(_ input: [String: Any]?) -> [UIPageViewController.OptionsKey: Any]? {
+	guard let input = input else { return nil }
+	return Dictionary(uniqueKeysWithValues: input.map { key, value in (UIPageViewController.OptionsKey(rawValue: key), value)})
 }
